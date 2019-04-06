@@ -1,15 +1,27 @@
 import java.io.BufferedReader;
+import java.io.*;
+import java.net.*;
 
 public class Client {
 	
-	public static void main(String arg[]) 
+	public static void main(String arg[]) throws Exception
 	{
-		//this is where u read in input from command line and connect to the server datagram thing
-		
+
 		int test = hash("yeet");
+		BufferedReader inFromUser =
+				new BufferedReader(new InputStreamReader(System.in));
+		DatagramSocket clientSocket = new DatagramSocket();
+		InetAddress IPAddress = InetAddress.getByName("Noahs-MacBook-Pro.local");
+		System.out.println("xd");
+		byte[] sendData = new byte[1024];
+		byte[] receiveData = new byte[1024];
+		String picName = inFromUser.readLine();
 		
-		
-		System.out.println(test);
+
+
+
+
+
 		
 		
 	}
