@@ -29,11 +29,11 @@ import java.net.DatagramPacket;
 
 public class DirectoryServer implements Serializable extends Thread {
     private int id;
-    private int ip
+    private int ip;
     private int udpPort;
     private int tcpPort;
-    private DirectoryServer predecessor;
-    private DirectoryServer sucessor;
+    private String predecessor;
+    private String sucessor;
     private Map<String, Integer> data;
 
     //UDP - Client-DS
@@ -62,7 +62,7 @@ public class DirectoryServer implements Serializable extends Thread {
         this.socket = new DatagramSocket(this.udpPort);
     }
 
-    public void linkDS(DirectoryServer child, DirectoryServer parent) {
+    public void linkDS(String child, String parent) {
         this.predecessor = child;
         this.sucessor = parent;
     }
@@ -173,5 +173,29 @@ public class DirectoryServer implements Serializable extends Thread {
         clientSocket.close();
 
     }
-
+ 
+    public static void main(String args[])
+    {
+        int id = Integer.parseInt(args[0]);
+        Thread t = new DirectoryServer(id);
+        //t.start();
+        
+        InetAddress ip = InetAddress.getLocalHost();
+        int address = ip.getHostAddress(); //ip address of machine
+        System.out.println("Dir. Server - ID: " + id + " IP Address: " + address);
+        
+        Scanner scanner = New Scanner(System.in);
+        System.out.println("Enter Child IP: ");
+        String child = scanner.nextLine();
+        
+        System.out.println("Enter Parent IP: ");
+        String parent = scannner.nextLine();
+        
+        t.linkDS(child, parent);
+        
+        
+        
+        
+        
+    }
 }
