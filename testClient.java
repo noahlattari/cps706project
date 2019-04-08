@@ -12,6 +12,7 @@ public class testClient
         String server = "localhost";
         int port = Integer.parseInt(args[0]);
     
+        String imgName = args[1]; //dicedog.jpg
         // Connect to server and send image
         try
         {
@@ -31,11 +32,12 @@ public class testClient
                 out.writeUTF("client: hello to server");
 
             // Image to send
-            BufferedImage clientImg = ImageIO.read(new File("./img/dicedog.jpg"));
+            out.writeUTF(imgName);
+            BufferedImage clientImg = ImageIO.read(new File("./cli_img/" + imgName));
             
             // Send image
             ImageIO.write(clientImg, "JPG", client.getOutputStream());
-            System.out.println("Image successfully sent to client");
+            System.out.println("Image successfully sent to server");
 
             client.close();
         }

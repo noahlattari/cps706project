@@ -34,11 +34,12 @@ public class testServ extends Thread
                     System.out.println(bin.readUTF());
 				
                 // Retrieve sent image from Client
+                String imgName = bin.readUTF();
 				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
-				System.out.println("Image recieved");
-                
-                File download = new File("outputdog.jpg");
+                File download = new File("./serv_img/" + imgName);
                 ImageIO.write(img, "jpg", download);
+                
+                System.out.println("Image recieved and downloaded from client");
 			}
             catch(SocketTimeoutException st)
             {
