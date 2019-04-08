@@ -3,6 +3,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
+import java.lang;
 
 
 //What does node need to contain?
@@ -41,7 +42,6 @@ public class DirectoryServer implements Serializable extends Thread {
     private boolean running;
     private byte[] buffer = new byte[256];
 
-
     //TCP - DS-DS - Server
     DatagramSocket serverSocket = new DatagramSocket(9876) //temp port
     byte[] receiveData = new byte[1024];
@@ -50,13 +50,13 @@ public class DirectoryServer implements Serializable extends Thread {
     //TCP - DS-DS - Client
     DatagramSocket clientSocket = new DatagramSocket();
     InetAddress IPAddress = InetAddress.getByName("Noahs-MacBook-Pro.local");
-    boolean serverOn = true;
+    boolean serverOn = true;s
 
     public DirectoryServer(int id) {
         this.id = id;
         //this.ip = ;
-        this.udpPort = 56;
-        this.tcpPort = 56;
+        this.udpPort = 20650;
+        this.tcpPort = 20650;
 
         //Setup UDP for Client-DS
         this.socket = new DatagramSocket(this.udpPort);
@@ -176,22 +176,20 @@ public class DirectoryServer implements Serializable extends Thread {
  
     public static void main(String args[])
     {
+        //Instantiate variables
+        Scanner scanner = New Scanner(System.in);
         int id = Integer.parseInt(args[0]);
         Thread t = new DirectoryServer(id);
-        //t.start();
-        
+
+        //Get Machine IP
         InetAddress ip = InetAddress.getLocalHost();
-        int address = ip.getHostAddress(); //ip address of machine
+        int address = ip.getHostAddress();
         System.out.println("Dir. Server - ID: " + id + " IP Address: " + address);
-        
-        Scanner scanner = New Scanner(System.in);
-        System.out.println("Enter Child IP: ");
-        String child = scanner.nextLine();
-        
-        System.out.println("Enter Parent IP: ");
-        String parent = scannner.nextLine();
-        
-        t.linkDS(child, parent);
+
+        //Set Neighbor IPs
+        System.out.println("Enter Child IP (space) Parent ID: ");
+        String[] neighbors = scanner.nextLine().split("\\s+");
+        t.linkDS(neighbors[0], neighbors[1]);
         
         
         
