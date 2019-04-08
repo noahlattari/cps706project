@@ -35,8 +35,10 @@ public class testClient
             clientImg = ImageIO.read(new File("./img/dicedog.jpg"));
             
             // Send image
+
             ImageIO.write(clientImg, "JPG", client.getOutputStream());
             System.out.println("Image successfully sent to client");
+
             client.close();
         }
         catch( IOException e)
