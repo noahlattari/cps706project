@@ -23,15 +23,15 @@ public class testServ extends Thread
 				server = sSocket.accept();
 				
 				// IO Communication between Server and Client
-				DataInputStream in = new DataInputStream(server.getInputStream());
+				DataInputStream bin = new DataInputStream(server.getInputStream());
                     // Read and output messages from Client
-                    System.out.println(in.readUTF());
-                    System.out.println(in.readUTF());
+                    System.out.println(bin.readUTF());
+                    System.out.println(bin.readUTF());
 				
-                DataOutputStream out = new DataOutputStream(server.getOutputStream());
+                DataOutputStream bout = new DataOutputStream(server.getOutputStream());
                     // Send messages to Client
-                    out.writeUTF("server: -i am greeting server");
-                    out.writeUTF("server:- hi! hello client");
+                    bout.writeUTF("server: -i am greeting server");
+                    bout.writeUTF("server:- hi! hello client");
 				
                 // Retrieve sent image from Client
 				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));

@@ -1,14 +1,14 @@
 import java.net.*;
 import java.io.*;
-import java.awt.*;
-import java.imageio.*;
+import java.awt.image.*;
+import javax.imageio.*;
 
 // Client to send image to server
 public class testClient
 {
-    BufferedImage clientImg;
+    static BufferedImage clientImg;
     
-    public static void main(String arg[]) throws Exception
+    public static void main(String args[]) throws Exception
     {
         String server = "localhost";
         int port = Integer.parseInt(args[0]);
@@ -29,13 +29,13 @@ public class testClient
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 // Send messages to server
                 out.writeUTF("Hello from " + client.getLocalSocketAddress());
-                out.writeUTF("client: hello to server")
+                out.writeUTF("client: hello to server");
 
             // Image to send
-            bClientImg = ImageIO.read(new File("./dicedog.jpg"));
+            clientImg = ImageIO.read(new File("./img/dicedog.jpg"));
             
             // Send image
-            ImageIO.write(bClientImg, "JPG", client.getOutputStream());
+            ImageIO.write(clientImg, "JPG", client.getOutputStream());
             System.out.println("Image successfully sent to client");
             client.close();
         }
