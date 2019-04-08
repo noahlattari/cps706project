@@ -1,9 +1,18 @@
+import java.util.*;
+import java.lang.*;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
+<<<<<<< HEAD
 import java.lang;
+=======
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+>>>>>>> e78a106ee4827e63d25e1d001ed8ddff79bb3b11
 
 
 //What does node need to contain?
@@ -43,7 +52,7 @@ public class DirectoryServer implements Serializable extends Thread {
     private byte[] buffer = new byte[256];
 
     //TCP - DS-DS - Server
-    DatagramSocket serverSocket = new DatagramSocket(9876) //temp port
+    DatagramSocket serverSocket = new DatagramSocket(9876); //temp port
     byte[] receiveData = new byte[1024];
     byte[] sendData = new byte[1024];
 
@@ -76,7 +85,7 @@ public class DirectoryServer implements Serializable extends Thread {
 
     public int getData(String contentName) {
         int clientIp = this.data.get(contentName);
-        if (clientIp != null) {
+        if (clientIp != -1) {
             return clientIp;
         } else {
             return 404; // change to HTTP Response Codes
@@ -164,7 +173,7 @@ public class DirectoryServer implements Serializable extends Thread {
 
             System.out.println("FROM SERVER:" + result);
 
-            if(sentence.toUpperCase.equals("EXIT"))
+            if(sentence.toUpperCase().equals("EXIT"))
             {
                 serverOn = false;
             }
@@ -183,7 +192,7 @@ public class DirectoryServer implements Serializable extends Thread {
 
         //Get Machine IP
         InetAddress ip = InetAddress.getLocalHost();
-        int address = ip.getHostAddress();
+        String address = ip.getHostAddress(); //ip address of machine
         System.out.println("Dir. Server - ID: " + id + " IP Address: " + address);
 
         //Set Neighbor IPs
