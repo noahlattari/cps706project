@@ -1,12 +1,14 @@
 import java.net.*;
 import java.io.*;
+import java.awt.image.*;
+import javax.imageio.*;
 
-public class Server extends Thread
+public class testServ extends Thread
 {
 	private ServerSocket sSocket;
 	Socket server;
 	
-	public Server(int port) throws IOException, SQLException, ClassNotFoundException, Exception
+	public testServ(int port) throws IOException, ClassNotFoundException, Exception
 	{
 		sSocket = new ServerSocket(port);
 		sSocket.setSoTimeout(180000);
@@ -14,17 +16,24 @@ public class Server extends Thread
 	
 	public void run()
 	{
-		while true()
+		while (true)
 		{
 			try
 			{
 				server = sSocket.accept();
 				
-				/* Communication
+				// IO Communication between Server and Client
 				DataInputStream in = new DataInputStream(server.getInputStream());
-				DataOutpoutStream out = new DataOutputStream(server.getOutputStream());
-				*/
+                    // Read and output messages from Client
+                    System.out.println(in.readUTF());
+                    System.out.println(in.readUTF());
 				
+                DataOutputStream out = new DataOutputStream(server.getOutputStream());
+                    // Send messages to Client
+                    out.writeUTF("server: -i am greeting server");
+                    out.writeUTF("server:- hi! hello client");
+				
+                // Retrieve sent image from Client
 				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
 				System.out.println("Image recieved");
 			}
@@ -45,10 +54,10 @@ public class Server extends Thread
 		}
 	}
 	
-	public static void main(String [] args) throws IOException, SQLException, ClassNotFoundException, Exception
+	public static void main(String [] args) throws IOException, ClassNotFoundException, Exception
     {
-    	//int port = Integer.parseInt(args[0]);
-   		Thread t = new GreetingServer(6066);
+    	int port = Integer.parseInt(args[0]);
+   		Thread t = new testServ(port);
     	t.start();
     }
 }
