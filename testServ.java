@@ -24,18 +24,21 @@ public class testServ extends Thread
 				
 				// IO Communication between Server and Client
 				DataInputStream bin = new DataInputStream(server.getInputStream());
+                DataOutputStream bout = new DataOutputStream(server.getOutputStream());
+                    
+                    // Send messages to Client
+                    bout.writeUTF("server: -i am greeting server");
+                    bout.writeUTF("server:- hi! hello client");
                     // Read and output messages from Client
                     System.out.println(bin.readUTF());
                     System.out.println(bin.readUTF());
 				
-                DataOutputStream bout = new DataOutputStream(server.getOutputStream());
-                    // Send messages to Client
-                    bout.writeUTF("server: -i am greeting server");
-                    bout.writeUTF("server:- hi! hello client");
-				
                 // Retrieve sent image from Client
 				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
 				System.out.println("Image recieved");
+                
+                File download = new File("outputdog.jpg");
+                ImageIO.write(img, "jpg", download);
 			}
             catch(SocketTimeoutException st)
             {
