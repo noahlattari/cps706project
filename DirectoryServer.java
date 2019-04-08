@@ -5,14 +5,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
-<<<<<<< HEAD
-import java.lang;
-=======
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
->>>>>>> e78a106ee4827e63d25e1d001ed8ddff79bb3b11
 
 
 //What does node need to contain?
@@ -38,6 +34,7 @@ import java.io.InputStreamReader;
 
 
 public class DirectoryServer extends Thread {
+
     private int id;
     private int ip;
     private int udpPort;
@@ -97,13 +94,16 @@ public class DirectoryServer extends Thread {
     public void run() {
         running = true;
 
+        byte[] sendData = new byte[1024];
+        byte[] receiveData = new byte[1024];
+        
         while (running) {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
 
             InetAddress address = packet.getAddress();
             int port = packet.getPort();
-            packet = new DatagramPacket(buf, buf.length, address, port); // return message
+            packet = new DatagramPacket(receiveData, receiveData.length, address, port); // return message
 
             String request = new String(packet.getData(), 0, packet.getLength());
 
@@ -206,11 +206,6 @@ public class DirectoryServer extends Thread {
         t.linkDS(neighbors[0], neighbors[1]);
 
         scanner.close();
-
-
-
-
-        
         
         
         
