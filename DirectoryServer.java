@@ -5,10 +5,14 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
+<<<<<<< HEAD
+import java.lang;
+=======
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+>>>>>>> e78a106ee4827e63d25e1d001ed8ddff79bb3b11
 
 
 //What does node need to contain?
@@ -47,7 +51,6 @@ public class DirectoryServer implements Serializable, Thread {
     private boolean running;
     private byte[] buffer = new byte[256];
 
-
     //TCP - DS-DS - Server
     DatagramSocket serverSocket = new DatagramSocket(9876); //temp port
     byte[] receiveData = new byte[1024];
@@ -56,13 +59,13 @@ public class DirectoryServer implements Serializable, Thread {
     //TCP - DS-DS - Client
     DatagramSocket clientSocket = new DatagramSocket();
     InetAddress IPAddress = InetAddress.getByName("Noahs-MacBook-Pro.local");
-    boolean serverOn = true;
+    boolean serverOn = true;s
 
     public DirectoryServer(int id) {
         this.id = id;
         //this.ip = ;
-        this.udpPort = 56;
-        this.tcpPort = 56;
+        this.udpPort = 20650;
+        this.tcpPort = 20650;
 
         //Setup UDP for Client-DS
         this.socket = new DatagramSocket(this.udpPort);
@@ -185,13 +188,16 @@ public class DirectoryServer implements Serializable, Thread {
  
     public static void main(String args[])
     {
+        //Instantiate variables
+        Scanner scanner = New Scanner(System.in);
         int id = Integer.parseInt(args[0]);
         Thread t = new DirectoryServer(id);
-        //t.start();
-        
+
+        //Get Machine IP
         InetAddress ip = InetAddress.getLocalHost();
         String address = ip.getHostAddress(); //ip address of machine
         System.out.println("Dir. Server - ID: " + id + " IP Address: " + address);
+<<<<<<< HEAD
         
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter Child IP: ");
@@ -201,6 +207,13 @@ public class DirectoryServer implements Serializable, Thread {
         String parent = scanner.nextLine();
         
         t.linkDS(child, parent);
+=======
+
+        //Set Neighbor IPs
+        System.out.println("Enter Child IP (space) Parent ID: ");
+        String[] neighbors = scanner.nextLine().split("\\s+");
+        t.linkDS(neighbors[0], neighbors[1]);
+>>>>>>> d99d693578d4b331cad6853f8e181bacf9b25bf9
         
         
         
