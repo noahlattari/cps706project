@@ -11,7 +11,7 @@ public class testServ extends Thread
 	public testServ(int port) throws IOException, ClassNotFoundException, Exception
 	{
 		sSocket = new ServerSocket(port);
-		sSocket.setSoTimeout(180000);
+		sSocket.setSoTimeout(10000);
 	}
 	
 	public void run()

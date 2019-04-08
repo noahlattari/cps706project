@@ -6,7 +6,6 @@ import javax.imageio.*;
 // Client to send image to server
 public class testClient
 {
-    static BufferedImage clientImg;
     
     public static void main(String args[]) throws Exception
     {
@@ -32,7 +31,7 @@ public class testClient
                 out.writeUTF("client: hello to server");
 
             // Image to send
-            clientImg = ImageIO.read(new File("./img/dicedog.jpg"));
+            BufferedImage clientImg = ImageIO.read(new File("./img/dicedog.jpg"));
             
             // Send image
 
