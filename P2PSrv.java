@@ -3,12 +3,12 @@ import java.io.*;
 import java.awt.image.*;
 import javax.imageio.*;
 
-public class testServ extends Thread
+public class P2PSrv extends Thread
 {
 	private ServerSocket sSocket;
 	Socket server;
 	
-	public testServ(int port) throws IOException, ClassNotFoundException, Exception
+	public P2PSrv(int port) throws IOException, ClassNotFoundException, Exception
 	{
 		sSocket = new ServerSocket(port);
 		sSocket.setSoTimeout(10000);
@@ -23,23 +23,20 @@ public class testServ extends Thread
 				server = sSocket.accept();
 				
 				// IO Communication between Server and Client
-				DataInputStream bin = new DataInputStream(server.getInputStream());
-                DataOutputStream bout = new DataOutputStream(server.getOutputStream());
-                    
+				DataInputStream in = new DataInputStream(server.getInputStream());
+                DataOutputStream out = new DataOutputStream(server.getOutputStream());
                     // Send messages to Client
-                    bout.writeUTF("server: -i am greeting server");
-                    bout.writeUTF("server:- hi! hello client");
+                    out.writeUTF("Server: Connection Established\n");
                     // Read and output messages from Client
-                    System.out.println(bin.readUTF());
-                    System.out.println(bin.readUTF());
-				
+                    System.out.println(in.readUTF());   
+                		
                 // Retrieve sent image from Client
-                String imgName = bin.readUTF();
+                String imgName = in.readUTF();
 				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
-                File download = new File("./serv_img/" + imgName);
+                File download = new File("./srv_img/" + imgName);
                 ImageIO.write(img, "jpg", download);
                 
-                System.out.println("Image recieved and downloaded from client");
+                System.out.println("Successful retrieval and download of client's image\n");
 			}
             catch(SocketTimeoutException st)
             {
@@ -60,8 +57,7 @@ public class testServ extends Thread
 	
 	public static void main(String [] args) throws IOException, ClassNotFoundException, Exception
     {
-    	int port = Integer.parseInt(args[0]);
-   		Thread t = new testServ(port);
+   		Thread t = new P2PSrv( Integer.parseInt(args[0]));
     	t.start();
     }
 }
