@@ -33,7 +33,7 @@ import java.io.InputStreamReader;
 //  main function (instantiate the nodes)
 
 
-public class DirectoryServer implements Serializable extends Thread {
+public class DirectoryServer implements Serializable, Thread {
     private int id;
     private int ip;
     private int udpPort;
@@ -93,13 +93,16 @@ public class DirectoryServer implements Serializable extends Thread {
     public void run() {
         running = true;
 
+        byte[] sendData = new byte[1024];
+        byte[] receiveData = new byte[1024];
+        
         while (running) {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
 
             InetAddress address = packet.getAddress();
             int port = packet.getPort();
-            packet = new DatagramPacket(buf, buf.length, address, port); // return message
+            packet = new DatagramPacket(receiveData, receiveData.length, address, port); // return message
 
             String request = new String(packet.getData(), 0, packet.getLength());
 
@@ -190,12 +193,12 @@ public class DirectoryServer implements Serializable extends Thread {
         String address = ip.getHostAddress(); //ip address of machine
         System.out.println("Dir. Server - ID: " + id + " IP Address: " + address);
         
-        Scanner scanner = New Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter Child IP: ");
         String child = scanner.nextLine();
         
         System.out.println("Enter Parent IP: ");
-        String parent = scannner.nextLine();
+        String parent = scanner.nextLine();
         
         t.linkDS(child, parent);
         
