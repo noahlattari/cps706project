@@ -31,7 +31,7 @@ public class Client
             
             // Send image
             ImageIO.write(bClientImg, "JPG", client.getOutputStream());
-            System.out.println("Image sent to client");
+            System.out.println(f"Image sent to client");
             client.close();
         }
         catch( IOException e)
