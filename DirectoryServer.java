@@ -37,7 +37,7 @@ import java.io.InputStreamReader;
 //  main function (instantiate the nodes)
 
 
-public class DirectoryServer implements Serializable extends Thread {
+public class DirectoryServer extends Thread {
     private int id;
     private int ip;
     private int udpPort;
@@ -45,6 +45,7 @@ public class DirectoryServer implements Serializable extends Thread {
     private String predecessor;
     private String sucessor;
     private Map<String, Integer> data;
+    private String primaryNode;
 
     //UDP - Client-DS
     private DatagramSocket socket;
@@ -188,17 +189,27 @@ public class DirectoryServer implements Serializable extends Thread {
         //Instantiate variables
         Scanner scanner = New Scanner(System.in);
         int id = Integer.parseInt(args[0]);
-        Thread t = new DirectoryServer(id);
+        DirectoryServer t = new DirectoryServer(id);
 
         //Get Machine IP
         InetAddress ip = InetAddress.getLocalHost();
         String address = ip.getHostAddress(); //ip address of machine
         System.out.println("Dir. Server - ID: " + id + " IP Address: " + address);
 
+        //Set DS ID#1 IP
+        System.out.println("Enter DS #1 IP: ");
+        t.primaryNode = in.nextLine();
+
         //Set Neighbor IPs
         System.out.println("Enter Child IP (space) Parent ID: ");
         String[] neighbors = scanner.nextLine().split("\\s+");
         t.linkDS(neighbors[0], neighbors[1]);
+
+        scanner.close();
+
+
+
+
         
         
         
