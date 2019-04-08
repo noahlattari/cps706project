@@ -25,7 +25,7 @@ public class Server extends Thread
 				DataOutpoutStream out = new DataOutputStream(server.getOutputStream());
 				*/
 				
-				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(socket.getInputStream()));
+				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
 				System.out.println("Image recieved");
 			}
             catch(SocketTimeoutException st)
