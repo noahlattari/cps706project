@@ -206,9 +206,5 @@ public class DirectoryServer extends Thread {
         t.linkDS(neighbors[0], neighbors[1]);
 
         scanner.close();
-        
-        
-        
-        
     }
 }
