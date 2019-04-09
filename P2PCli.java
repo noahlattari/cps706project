@@ -30,13 +30,13 @@ public class P2PCli
                 // Send messages to server
                 out.writeUTF("Client: Connection Established\n");
 
-            // Image to send
+            // Retrieve sent image from Client
             out.writeUTF(imgName);
-            BufferedImage clientImg = ImageIO.read(new File("./cli_img/" + imgName));
-            
-            // Send image
-            ImageIO.write(clientImg, "JPG", client.getOutputStream());
-            System.out.println("Image successfully sent to server");
+            BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(client.getInputStream()));
+            File download = new File("./img_c/" + imgName);
+            ImageIO.write(img, "jpg", download);
+                
+            System.out.println("Successfully downloaded " + imgName + "\n");
 
             client.close();
         }

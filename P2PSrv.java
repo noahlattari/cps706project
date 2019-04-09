@@ -29,14 +29,15 @@ public class P2PSrv extends Thread
                     out.writeUTF("Server: Connection Established\n");
                     // Read and output messages from Client
                     System.out.println(in.readUTF());   
-                		
-                // Retrieve sent image from Client
+                                
+                // Image to send
                 String imgName = in.readUTF();
-				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
-                File download = new File("./srv_img/" + imgName);
-                ImageIO.write(img, "jpg", download);
-                
-                System.out.println("Successful retrieval and download of client's image\n");
+                BufferedImage serverImg = ImageIO.read(new File("./img_s/" + imgName));
+            
+                // Send image
+                ImageIO.write(serverImg, "JPG", server.getOutputStream());
+                System.out.println("Image successfully sent to Client");
+
 			}
             catch(SocketTimeoutException st)
             {
