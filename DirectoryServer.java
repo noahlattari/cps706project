@@ -20,7 +20,21 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.net.SocketException;
 
+/**
+ *  CPS 706 - Socket Programming Project
+ *  Directory Server Implementation
+ *  Purpose: To implement the Directory Server aspect of Socket Programming
+ *
+ *  @Author Jonathan Lam, Judel Villardo, Noah Lattari
+ *  @Version 1.0
+ **/
 
+
+/**
+ * TCPServer - This class is used to establish and handle all Server communciation
+ *             between Directory Servers (DS).
+ *             Primary usage is for iterating through the DS and return all IPs in DHT
+ */
 class TCPServer
 {
     private ServerSocket serverSocket;
@@ -30,6 +44,11 @@ class TCPServer
     private DirectoryServer directoryServer;
 
 
+    /**
+     * TCPServer - Constructor method for TCPServer
+     * @param port - port number of machine
+     * @param ds - directory server associated with TCP Server
+     */
     public TCPServer(int port, DirectoryServer ds)
     {
         this.directoryServer = ds;
@@ -43,6 +62,9 @@ class TCPServer
 
     }
 
+    /**
+     * start - Awaits for a client to connect with Server and handles inputs based on message
+     */
     public void start()
     {
         try{
@@ -75,6 +97,10 @@ class TCPServer
         }
     }
 
+    /**
+     * stop - Closes all sockets related to TCP Server
+     */
+
     public void stop()
     {
         try {
@@ -90,16 +116,33 @@ class TCPServer
     }
 }
 
+/**
+ * TCPClient - This class is responsible for estabilishing a connection between associated Directory Server
+ *             and the TCP Server of it's neighbor.
+ *             Request the Neighboring Directory Server to return the Ip address associated with its neighbor
+ */
+
 class TCPClient {
     private DirectoryServer directoryServer;
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
 
+    /**
+     * TCPClient - Constructor
+     * @param ds - Directory Server associated with Client
+     */
+
     public TCPClient(DirectoryServer ds)
     {
         directoryServer = ds;
     }
+
+    /**
+     * Creates sockets associated with TCP client
+     * @param nextIP - IP associated with Directory Server's Successor
+     * @param port - Port of machine
+     */
 
     public void start(String nextIP, int port) {
         try {
@@ -112,6 +155,12 @@ class TCPClient {
         }
 
     }
+
+    /**
+     * sendRequests - sends a command to the target Server
+     * @param command - Request type for Server to handle
+     * @return returns the IP Address of the Directory Server's Successor
+     */
 
     public String sendRequest(String command) {
         out.println("init");
@@ -128,6 +177,10 @@ class TCPClient {
         return "Unable to retrieve Neighbor Directory Server IP.";
     }
 
+    /**
+     * stop - stops the sockets, PrintWriter and BufferedReader associated with this TCP Client instance
+     */
+
     public void stop() {
         try{
             in.close();
@@ -141,6 +194,10 @@ class TCPClient {
     }
 }
 
+/**
+ * UDPServer - This class handles the requests sent from P2P Client to DHT
+ */
+
 class UDPServer extends Thread
 {
     private DatagramSocket socket;
@@ -149,6 +206,11 @@ class UDPServer extends Thread
     DirectoryServer directoryServer;
 
 
+    /**
+     * UDPServer - Constructor
+     * @param port - port associated with local machine
+     * @param ds - Associated Directory Server instance
+     */
     public UDPServer(int port, DirectoryServer ds)
     {
         buffer = new byte[256];
@@ -163,6 +225,14 @@ class UDPServer extends Thread
         directoryServer = ds;
         running = true;
     }
+
+    /**
+     * run - Executes the UDPServer within a thread
+     *       Handles all requests sent by P2P client. This includes:
+     *          init - find all IP of Directory Servers in DHT
+     *          query - find Directory Server related to a specific contentName key
+     *          exit - terminate all UDP related server sockets
+     */
 
     public void run()
     {
@@ -217,6 +287,10 @@ class UDPServer extends Thread
     }
 }
 
+/**
+ * DirectoryServer - This main class is responsible for estabilishing all responsibilities of the Directory Server
+ */
+
 public class DirectoryServer {
     private String ip;
     private int id;
@@ -230,7 +304,11 @@ public class DirectoryServer {
     private TCPClient tcpClient;
     private TCPServer tcpServer;
 
-    private String ipList;
+    /**
+     * DirectoryServer - Constructor
+     * @param id - ID associated with Directory Server (I.e.: 1, 2, 3, 4)
+     * @param port - port number associated with machine this instance is on
+     */
 
     public DirectoryServer(int id, int port) {
         try {
@@ -251,26 +329,42 @@ public class DirectoryServer {
         startUDPServer();
     }
 
+    /**
+     * StartUDPServer() - Initiates the UDP Server to run on a separate thread
+     */
+
     public void startUDPServer() {
         udpServer = new UDPServer(port, this);
         udpServer.start();
     }
 
-    /** TCPServer should start TCP Client to send **/
+    /**
+     * startTCPServer() - Initates TCP Server
+     */
     public void startTCPServer() {
         TCPServer tcpServer = new TCPServer(port, this);
         tcpServer.start();
     }
 
+    /**
+     * stopTCPServer() - stops TCPServer from running
+     */
     public void stopTCPServer() {
         tcpServer.stop();
     }
 
+    /**
+     * getID() - retrieves the ID of current Directory Server
+     * @return - ID of Directory Server
+     */
     public String getID() {
         return Integer.toString(id);
     }
 
-    /** Only used for Node #1 instantiated by TCPServer **/
+    /**
+     * getIPS() - retrieves the IP addresses of all Directory Servers on DHT
+     * @return a String of IPS in the form of: IP1,IP2,IP3,IP4
+     */
     public String getIPS() {
         String ipList = this.ip + "," + this.next;
         String neighbor = this.next;
@@ -287,27 +381,44 @@ public class DirectoryServer {
         return ipList;
     }
 
-    public void setIPS(String msg) {
-        ipList = msg;
-    }
-
+    /**
+     * setPrimary() sets the the First Directory Server
+     * @param primaryNode - IP Address of Directory Server #1
+     */
     public void setPrimary(String primaryNode) {
         primaryDS = primaryNode;
     }
 
+    /**
+     * setNeighbors() - sets the IPAddress of the Directory Server's predecessor and successor
+     * @param prev - predecessor IP
+     * @param next - successor IP
+     */
     public void setNeighbors(String prev, String next) {
         this.prev = prev;
         this.next = next;
     }
 
+    /**
+     * getPrimaryDS() - retrieves the IP Address of Directory Server #1
+     * @return return Directory Server #1 IP Address
+     */
     public String getPrimaryDS() {
         return primaryDS;
     }
 
+    /**
+     * getNextIP() - Retrieves Directory Server's Successor IP Address
+     * @return - returns an IP Address
+     */
     public String getNextIP() {
         return next;
     }
 
+    /**
+     * getNeighbors() - returns the IP Address of the Directory Server's predecessor and successor
+     * @return returns a list of strings
+     */
     public List<String> getNeighbors() {
         List<String> neighbors = new ArrayList<String>();
         neighbors.add(this.prev);
@@ -316,13 +427,32 @@ public class DirectoryServer {
         return neighbors;
     }
 
+
+    /**
+     * getPort() - Retrieves the port number associated with Directory Server
+     * @return an integer signifying local machine port number
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * getIP() - Retrieves the IP Address associated with local machine
+     * @return - A String signifying an IP Address
+     */
+
     public String getIP() {
         return ip;
     }
+
+    /**
+     * setData() - adds a (Key, Value) pair to the data object
+     *             indicates that this Directory Server contains the IP Address of the
+     *             location of the image.
+     *
+     * @param contentName - image name as key
+     * @param location - IP address of where image is located
+     */
 
     public void setData(String contentName, String location) {
         List<String> storedValues = data.get(contentName);
@@ -338,11 +468,22 @@ public class DirectoryServer {
         data.put(contentName, storedValues);
     }
 
+    /**
+     * getData() - Retrives the IP Address(es) of the image desired
+     * @param contentName - key/image name
+     * @return - returns a list of IP Addresses. More than one if >1 peer has the same image
+     */
     public List<String> getData(String contentName) {
         return data.get(contentName);
         /** Add NULL Check **/
     }
 
+    /**
+     * removeData() - removes (Key, Value) pair
+     * @param contentName - name of image
+     * @param location - IP Address to delete
+     * @return - a boolean signifying if process has successfully completed
+     */
     public boolean removeData(String contentName, String location) {
         List<String> storedValues = data.get(contentName);
 
@@ -355,6 +496,11 @@ public class DirectoryServer {
         return false;
     }
 
+    /**
+     * Main - Main method of Directory Server class
+     * @param args - args[0] is the ID associated with Directory Server
+     *               args[1] is the Port number associated with Directory Server
+     */
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
 
