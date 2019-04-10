@@ -90,4 +90,20 @@ public class PCli
             }
         }
     }
+
+    public static int modHash(String content_name)
+    {
+        int x = 0;
+        for (int i = 0; i < content_name.length(); i++)
+        {
+            char character = content_name.charAt(i);
+            int ascii = (int) character;
+
+            x += ascii;
+        }
+
+        int y = x % 4;
+
+        return y;
+    }
 }
