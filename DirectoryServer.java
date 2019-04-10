@@ -20,8 +20,6 @@ public class TCPServer
     private Socket clientSocket;
     private PrintWrite out;
     private BufferedReader in;
-    private String ipList;
-    private String clientID;
     private DirectoryServer directoryServer;
 
 
@@ -29,24 +27,20 @@ public class TCPServer
     {
         this.directoryServer = ds;
         this.serverSocket = new ServerSocket(port);
-        clientSocket = serverSocket.accept();
     }
 
     public void start()
     {
+        clientSocket = serverSocket.accept();
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamreader(clientSocket.getInputStream()));
-        String greeting = in.readLine();
 
-        if ("hello server".equals(greeting))
-        {
-            out.println("hello client");
+        String command = in.readLine();
+        if(command.equals("init")) {
+            out.println(directoryServer.getNextIP());
+        } else {
+            out.println("Unknown. Please Retry");
         }
-        else
-        {
-            out.println("unrecognized greeting");
-        }
-
     }
 
     public void stop()
@@ -56,33 +50,27 @@ public class TCPServer
         clientSocket.close();
         serverSocket.close();
     }
-
-//    public static void main(String[] args)
-//    {
-//        DSTCPSrv server = new DSTCPSrv(20650);
-//        server.start();
-//    }
 }
 
 public class TCPClient {
     private DirectoryServer directoryServer;
-    private Socket clientSocket;
+    private Socket socket;
     private PrinterWriter out;
     private BufferedReader in;
 
-    public TCPClient(String nextIP, int port, DirectoryServer ds)
+    public TCPClient(DirectoryServer ds)
     {
         directoryServer = ds;
-        clientSocket = new Socket(nextIP, port);
     }
 
-    public void start(String ip, int port) {
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    public void start(String nextIp, int port) {
+        socket = new Socket(nextIP, port);
+        out = new PrintWriter(socket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
-    public String sendMessage(String msg) {
-        out.println(msg);
+    public String sendRequest(String command) {
+        out.println(ipList);
         String resp = in.readLine();
         return resp;
     }
@@ -90,17 +78,9 @@ public class TCPClient {
     public void stop() {
         in.close();
         out.close();
-        clientSocket.close();
+        socket.close();
     }
 }
-
-//    @Test
-//    public void givenGreetingClient_whenServerRespondsWhenStarted_thenCorrect() {
-//        DSTCPCli client = new DSTCPCli();
-//        client.startConnection("127.0.0.1", 20650);
-//        String response = client.sendMessage("hello server");
-//        assertEquals("hello client", response);
-//    }
 
 class UDPServer extends Thread
 {
@@ -192,6 +172,8 @@ public class DirectoryServer {
 
         this.data = new HashMap<String, List<String>>();
 
+        tcpClient = new TCPClient(this);
+
         startTCPServer();
         startUDPServer();
     }
@@ -207,11 +189,24 @@ public class DirectoryServer {
         tcpServer.start();
     }
 
+    public String getID() {
+        return id.toString();
+    }
+
     /** Only used for Node #1 instantiated by TCPServer **/
     public String getIPS() {
-        tcpClient = new TCPClient(next, port, this);
-        tcpClient.start();
-        // TCPServer will set the value of ipList
+        String ipList = this.ip + "," + this.next;
+        String neighbor = this.next;
+
+        for (int i = 0; i < 2; i++) {
+            tcpClient.start(neighbor, this.port);
+            String neighbor = tcpClient.sendRequest("init");
+            ipList += "," + neighbor;
+
+        } // Only need two iterations since Node1 already knows Node1 and Node2.
+        //   Each call returns it's next neighbor I.E. Node3 returns ip of Node4
+
+        return ipList;
     }
 
     public void setIPS(String msg) {
@@ -229,6 +224,10 @@ public class DirectoryServer {
 
     public String getPrimaryDS() {
         return primaryDS;
+    }
+
+    public getNextIP() {
+        return next;
     }
 
     public List<String> getNeighbors {
