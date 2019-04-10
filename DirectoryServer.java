@@ -65,19 +65,15 @@ public class TCPServer
 }
 
 public class TCPClient {
+    private DirectoryServer directoryServer;
     private Socket clientSocket;
     private PrinterWriter out;
     private BufferedReader in;
-    private String targetID;
-    private String ipList;
-    private DirectoryServer directoryServer;
 
-    public TCPClient(String ip, int port, DirectoryServer ds)
+    public TCPClient(String nextIP, int port, DirectoryServer ds)
     {
-        this.targetID = targetID;
-        this.ipList = ipList;
-        clientSocket = new Socket(ip, port);
-        this.directoryServer = ds;
+        directoryServer = ds;
+        clientSocket = new Socket(nextIP, port);
     }
 
     public void start(String ip, int port) {
@@ -146,9 +142,10 @@ class UDPServer extends Thread
                 String combined = "":
                 for (String value : result) {
                     combined += value;
-                    combined += ",";
+                    combined += ","; //format is ip1,ip2...
                 }
 
+                combined = combined.substring(0, combined.length() - 1);
                 buffer = combined.getBytes();
             }
 
@@ -212,7 +209,7 @@ public class DirectoryServer {
 
     /** Only used for Node #1 instantiated by TCPServer **/
     public String getIPS() {
-        tcpClient = new TCPClient(ip, port, this);
+        tcpClient = new TCPClient(next, port, this);
         tcpClient.start();
         // TCPServer will set the value of ipList
     }
