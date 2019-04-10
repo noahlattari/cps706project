@@ -127,22 +127,44 @@ class UDPServer extends Thread
         while(running)
         {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
+            socket.receive(packet); // receive packet from client
 
-            int port = packet.getPort();
-            InetAddress address = packet.getAddress();
+            int port = packet.getPort(); //port of client
+            InetAddress address = packet.getAddress(); //address of client
 
-            packet = new DatagramPacket(buffer, buffer.length, address, port);
-            String msg = new String(packet.getData(), 0, packet.getLength());
+            String command = new String(packet.getData(), 0, packet.getLength()); //get command
 
-            if (msg.equals("end"))
-            {
+            if (command.equals("init")) {
+                String ipList = directoryServer.getIPS();
+                buffer = ipList.getBytes();
+            }
+
+            // Ex. query content_name - Assume format is "query contentName"
+            else if (command.contains("query")) {
+                String result = directoryServer.getData(command.split(" ")[1]);
+
+                String combined = "":
+                for (String value : result) {
+                    combined += value;
+                    combined += ",";
+                }
+
+                buffer = combined.getBytes();
+            }
+
+            else if (command.equals("exit")) {
+                buffer = ("Exiting . . . ").getBytes();
                 running = false;
                 continue;
+
+            } else {
+                buffer = ("Invalid. Retry").getBytes();
             }
+
+            packet = new DatagramPacket(buffer, buffer.length, address, port);
             socket.send(packet);
         }
-        socket.close();
+        stop();
     }
 
     public void stop()
@@ -262,4 +284,12 @@ public class DirectoryServer {
 
         return false;
     }
+
+    public static void main(String args[]) {
+
+
+
+
+    }
+
 }
