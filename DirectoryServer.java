@@ -13,12 +13,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
+import java.util.Scanner;
+import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.net.SocketException;
 
-public class TCPServer
+
+class TCPServer
 {
     private ServerSocket serverSocket;
     private Socket clientSocket;
-    private PrintWrite out;
+    private PrintWriter out;
     private BufferedReader in;
     private DirectoryServer directoryServer;
 
@@ -26,36 +33,67 @@ public class TCPServer
     public TCPServer(int port, DirectoryServer ds)
     {
         this.directoryServer = ds;
-        this.serverSocket = new ServerSocket(port);
+
+        try{
+            this.serverSocket = new ServerSocket(port);
+        }
+        catch(IOException ex) {
+            System.out.println("Could not setup Server Socket.");
+        }
+
     }
 
     public void start()
     {
-        clientSocket = serverSocket.accept();
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamreader(clientSocket.getInputStream()));
+        try{
+            clientSocket = serverSocket.accept();
+        }
+        catch(IOException ex) {
+            System.out.println("Could not setup Client Socket.");
+        }
 
-        String command = in.readLine();
-        if(command.equals("init")) {
-            out.println(directoryServer.getNextIP());
-        } else {
-            out.println("Unknown. Please Retry");
+        try{
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        }
+        catch(IOException ex) {
+            System.out.println("Could not setup Streams");
+        }
+
+        try{
+            String command = in.readLine();
+
+            if(command.equals("init")) {
+                out.println(directoryServer.getNextIP());
+            } else {
+                out.println("Unknown. Please Retry");
+            }
+
+        }
+        catch(IOException ex) {
+            System.out.println("TCP Server could not read instructions.");
         }
     }
 
     public void stop()
     {
-        in.close();
-        out.close();
-        clientSocket.close();
-        serverSocket.close();
+        try {
+            in.close();
+            out.close();
+            clientSocket.close();
+            serverSocket.close();
+        }
+        catch (IOException ex) {
+            System.out.println("Could not stop TCPServer. Please close Manually");
+        }
+
     }
 }
 
-public class TCPClient {
+class TCPClient {
     private DirectoryServer directoryServer;
     private Socket socket;
-    private PrinterWriter out;
+    private PrintWriter out;
     private BufferedReader in;
 
     public TCPClient(DirectoryServer ds)
@@ -63,22 +101,43 @@ public class TCPClient {
         directoryServer = ds;
     }
 
-    public void start(String nextIp, int port) {
-        socket = new Socket(nextIP, port);
-        out = new PrintWriter(socket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    public void start(String nextIP, int port) {
+        try {
+            socket = new Socket(nextIP, port);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        }
+        catch(IOException ex) {
+            System.out.println("Error estabilishing TCP Client. Resolve Manually.");
+        }
+
     }
 
     public String sendRequest(String command) {
-        out.println(ipList);
-        String resp = in.readLine();
-        return resp;
+        out.println("init");
+
+        try {
+            String resp = in.readLine();
+            return resp;
+        }
+        catch(IOException ex) {
+            System.out.println("TCP Client unable to read response from Directory Server TCP connection.");
+
+        }
+
+        return "Unable to retrieve Neighbor Directory Server IP.";
     }
 
     public void stop() {
-        in.close();
-        out.close();
-        socket.close();
+        try{
+            in.close();
+            out.close();
+            socket.close();
+        }
+        catch(IOException ex) {
+            System.out.println("Unable to end Directory Server TCP Client socket. Manual Intervention required");
+        }
+
     }
 }
 
@@ -90,10 +149,17 @@ class UDPServer extends Thread
     DirectoryServer directoryServer;
 
 
-    public UDPServer(int port, DirectoryServer ds);
+    public UDPServer(int port, DirectoryServer ds)
     {
         buffer = new byte[256];
-        socket = new DatagramSocket(port);
+
+        try {
+            socket = new DatagramSocket(port);
+        }
+        catch (SocketException ex) {
+            System.out.println("Unable to create UDP Server Datagram.");
+        }
+
         directoryServer = ds;
         running = true;
     }
@@ -103,49 +169,50 @@ class UDPServer extends Thread
         while(running)
         {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet); // receive packet from client
 
-            int port = packet.getPort(); //port of client
-            InetAddress address = packet.getAddress(); //address of client
+            try {
+                socket.receive(packet); // receive packet from client
 
-            String command = new String(packet.getData(), 0, packet.getLength()); //get command
+                int port = packet.getPort(); //port of client
+                InetAddress address = packet.getAddress(); //address of client
 
-            if (command.equals("init")) {
-                String ipList = directoryServer.getIPS();
-                buffer = ipList.getBytes();
-            }
+                String command = new String(packet.getData(), 0, packet.getLength()); //get command
 
-            // Ex. query content_name - Assume format is "query contentName"
-            else if (command.contains("query")) {
-                String result = directoryServer.getData(command.split(" ")[1]);
-
-                String combined = "":
-                for (String value : result) {
-                    combined += value;
-                    combined += ","; //format is ip1,ip2...
+                if (command.equals("init")) {
+                    String ipList = directoryServer.getIPS();
+                    buffer = ipList.getBytes();
                 }
 
-                combined = combined.substring(0, combined.length() - 1);
-                buffer = combined.getBytes();
+                // Ex. query content_name - Assume format is "query contentName"
+                else if (command.contains("query")) {
+                    List<String> result = directoryServer.getData(command.split(" ")[1]);
+
+                    String combined = "";
+                    for (String value : result) {
+                        combined += value;
+                        combined += ","; //format is ip1,ip2...
+                    }
+
+                    combined = combined.substring(0, combined.length() - 1);
+                    buffer = combined.getBytes();
+                }
+
+                else if (command.equals("exit")) {
+                    buffer = ("Exiting . . . ").getBytes();
+                    running = false;
+                    continue;
+
+                } else {
+                    buffer = ("Invalid. Retry").getBytes();
+                }
+
+                packet = new DatagramPacket(buffer, buffer.length, address, port);
+                socket.send(packet);
             }
-
-            else if (command.equals("exit")) {
-                buffer = ("Exiting . . . ").getBytes();
-                running = false;
-                continue;
-
-            } else {
-                buffer = ("Invalid. Retry").getBytes();
+            catch(IOException ex) {
+                System.out.println("Unable to successfully resolve packets in UDP Server");
             }
-
-            packet = new DatagramPacket(buffer, buffer.length, address, port);
-            socket.send(packet);
         }
-        stop();
-    }
-
-    public void stop()
-    {
         socket.close();
     }
 }
@@ -166,7 +233,13 @@ public class DirectoryServer {
     private String ipList;
 
     public DirectoryServer(int id, int port) {
-        this.ip = InetAddress.getLocalHost().getHostAddress();
+        try {
+            this.ip = InetAddress.getLocalHost().getHostAddress();
+        }
+        catch(UnknownHostException ex) {
+            System.out.println("Unable to find local machine IP.");
+        }
+
         this.id = id;
         this.port = port;
 
@@ -189,8 +262,12 @@ public class DirectoryServer {
         tcpServer.start();
     }
 
+    public void stopTCPServer() {
+        tcpServer.stop();
+    }
+
     public String getID() {
-        return id.toString();
+        return Integer.toString(id);
     }
 
     /** Only used for Node #1 instantiated by TCPServer **/
@@ -200,8 +277,9 @@ public class DirectoryServer {
 
         for (int i = 0; i < 2; i++) {
             tcpClient.start(neighbor, this.port);
-            String neighbor = tcpClient.sendRequest("init");
+            neighbor = tcpClient.sendRequest("init");
             ipList += "," + neighbor;
+            tcpClient.stop();
 
         } // Only need two iterations since Node1 already knows Node1 and Node2.
         //   Each call returns it's next neighbor I.E. Node3 returns ip of Node4
@@ -226,11 +304,11 @@ public class DirectoryServer {
         return primaryDS;
     }
 
-    public getNextIP() {
+    public String getNextIP() {
         return next;
     }
 
-    public List<String> getNeighbors {
+    public List<String> getNeighbors() {
         List<String> neighbors = new ArrayList<String>();
         neighbors.add(this.prev);
         neighbors.add(this.next);
@@ -238,16 +316,12 @@ public class DirectoryServer {
         return neighbors;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
     public String getIP() {
         return ip;
-    }
-
-    public String getPrimaryDS() {
-        return primaryDS;
     }
 
     public void setData(String contentName, String location) {
@@ -282,10 +356,18 @@ public class DirectoryServer {
     }
 
     public static void main(String args[]) {
+        Scanner in = new Scanner(System.in);
 
+        int id = Integer.parseInt(args[0]);
+        int port = Integer.parseInt(args[1]);
 
+        DirectoryServer directoryServer = new DirectoryServer(id, port);
+        directoryServer.startUDPServer();
+        directoryServer.startTCPServer();
 
-
+        if (in.nextLine().contains("exit")) {
+            directoryServer.stopTCPServer();
+        }
     }
 
 }
